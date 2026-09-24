@@ -10,16 +10,18 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\ProfileRepository;
+use App\Validator\NotLastProfile;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[NotLastProfile(groups: ['delete'])]
 #[ApiResource(operations: [
     new GetCollection(),
     new Get(),
     new Post(),
     new Patch(),
-    new Delete(),
+    new Delete(validate: true, validationContext: ['groups' => ['delete']]),
 ])]
 class Profile
 {

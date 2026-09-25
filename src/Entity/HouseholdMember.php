@@ -6,28 +6,55 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use App\Dto\HouseholdMemberInput;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\HouseholdMemberRepository;
+use App\Security\HouseholdVoter;
+use App\State\HouseholdMemberAddProcessor;
+use App\State\HouseholdMemberUpdateProcessor;
 use App\Validator\ExactlyOneOf;
-use App\Validator\UniqueActiveHouseholdOwner;
+use App\Validator\NotHouseholdOwner;
+use App\Validator\ValidHouseholdMembership;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * No GetCollection/Post here — listing and adding a member go through the
- * `/households/{id}/members` custom sub-resource (not implemented yet).
- * Only what's already scoped as standard here: read one, detach
- * (`leftAt`), transfer ownership (`isOwner`), or delete a mistaken entry.
+ * Listed and added through the `/households/{householdId}/members`
+ * sub-resource. Standard item routes: read one, detach (`leftAt`),
+ * transfer ownership (`isOwner`), or delete a mistaken entry. Only the
+ * household's active owner can change its members.
  */
 #[ORM\Entity(repositoryClass: HouseholdMemberRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ExactlyOneOf(first: 'profile', second: 'externalLabel')]
-#[UniqueActiveHouseholdOwner]
+#[ValidHouseholdMembership]
+#[NotHouseholdOwner(groups: ['delete'])]
 #[ApiResource(operations: [
+    new GetCollection(
+        uriTemplate: '/households/{householdId}/members',
+        uriVariables: ['householdId' => new Link(fromClass: Household::class, toProperty: 'household')],
+    ),
+    new Post(
+        uriTemplate: '/households/{householdId}/members',
+        uriVariables: ['householdId' => new Link(fromClass: Household::class, toProperty: 'household')],
+        input: HouseholdMemberInput::class,
+        read: false,
+        processor: HouseholdMemberAddProcessor::class,
+    ),
     new Get(),
-    new Patch(),
-    new Delete(),
+    new Patch(
+        security: "is_granted('".HouseholdVoter::MANAGE."', object)",
+        processor: HouseholdMemberUpdateProcessor::class,
+    ),
+    new Delete(
+        security: "is_granted('".HouseholdVoter::MANAGE."', object)",
+        validate: true,
+        validationContext: ['groups' => ['delete']],
+    ),
 ])]
 class HouseholdMember
 {
@@ -103,7 +130,14 @@ class HouseholdMember
         return $this;
     }
 
+    /** Hidden from the API: exposed as `owner`, the field is `isOwner` (see getIsOwner()). */
+    #[ApiProperty(readable: false, writable: false)]
     public function isOwner(): bool
+    {
+        return $this->isOwner;
+    }
+
+    public function getIsOwner(): bool
     {
         return $this->isOwner;
     }

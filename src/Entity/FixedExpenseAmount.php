@@ -49,7 +49,7 @@ class FixedExpenseAmount
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $amount = null;
 
-    /** Copied from the household's active member count at creation. */
+    /** Active member count of the fixed expense's household when the month was created — see AppliedDivisorListener. */
     #[ORM\Column]
     #[ApiProperty(writable: false)]
     private ?int $appliedDivisor = null;

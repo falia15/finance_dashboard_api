@@ -25,21 +25,6 @@ final class ActiveProfileScopeTest extends ApiTestCase
         $this->bob = $this->persist((new Profile())->setName('Bob'));
     }
 
-    /**
-     * @template T of object
-     *
-     * @param T $entity
-     *
-     * @return T
-     */
-    private function persist(object $entity): object
-    {
-        $this->entityManager()->persist($entity);
-        $this->entityManager()->flush();
-
-        return $entity;
-    }
-
     private function createIncome(string $label, ?Profile $profile = null, ?Household $household = null): Income
     {
         return $this->persist((new Income())

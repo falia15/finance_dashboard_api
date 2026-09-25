@@ -5,9 +5,9 @@ namespace App\Validator;
 use Symfony\Component\Validator\Constraint;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class UniqueActiveHouseholdOwner extends Constraint
+class NotHouseholdOwner extends Constraint
 {
-    public string $message = 'This household already has an active owner.';
+    public string $message = 'The household owner cannot be removed: delete the household instead.';
 
     public function getTargets(): string
     {

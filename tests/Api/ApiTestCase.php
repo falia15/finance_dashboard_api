@@ -2,6 +2,8 @@
 
 namespace App\Tests\Api;
 
+use App\Entity\Profile;
+use App\Http\ActiveProfileResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -46,6 +48,29 @@ abstract class ApiTestCase extends WebTestCase
     protected function entityManager(): EntityManagerInterface
     {
         return static::getContainer()->get(EntityManagerInterface::class);
+    }
+
+    /**
+     * @template T of object
+     *
+     * @param T $entity
+     *
+     * @return T
+     */
+    protected function persist(object $entity): object
+    {
+        $this->entityManager()->persist($entity);
+        $this->entityManager()->flush();
+
+        return $entity;
+    }
+
+    /**
+     * @return array<string, string> headers making the given profile the active one
+     */
+    protected static function activeProfile(Profile $profile): array
+    {
+        return [ActiveProfileResolver::HEADER => (string) $profile->getId()];
     }
 
     /**

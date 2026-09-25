@@ -12,6 +12,13 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        # No accounts in the MVP: the API is scoped by the X-Profile-Id header
+        # (App\Http\ActiveProfileResolver), not by an authenticated user.
+        # Voters (e.g. App\Security\HouseholdVoter) still work without a
+        # firewall, and a denial is a plain 403 instead of a 401 login challenge.
+        api:
+            pattern: ^/api/
+            security: false
         main:
             lazy: true
             provider: users_in_memory

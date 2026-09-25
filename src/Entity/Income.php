@@ -14,11 +14,13 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\IncomeRepository;
 use App\Validator\ExactlyOneOf;
+use App\Validator\InActiveProfileScope;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: IncomeRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
 #[ORM\Table(name: 'income')]
 #[ORM\UniqueConstraint(name: 'uniq_income_profile_period_label', columns: ['profile_id', 'year', 'month', 'label'])]
@@ -74,7 +76,7 @@ class Income
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $withholdingTax = null;
 
-    /** Computed from the household's active member count at creation — not implemented yet, always defaults to 1 for now. */
+    /** Active member count of the household when the row was entered (1 if individual) — see AppliedDivisorListener. */
     #[ORM\Column(options: ['default' => 1])]
     #[ApiProperty(writable: false)]
     private int $appliedDivisor = 1;

@@ -13,6 +13,7 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\FixedExpenseRepository;
 use App\Validator\ExactlyOneOf;
+use App\Validator\InActiveProfileScope;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -22,6 +23,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 #[ORM\Entity(repositoryClass: FixedExpenseRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
 #[ApiResource(operations: [
     new GetCollection(),

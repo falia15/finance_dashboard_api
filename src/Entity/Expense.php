@@ -15,12 +15,14 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\ExpenseRepository;
 use App\Validator\ExactlyOneOf;
+use App\Validator\InActiveProfileScope;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 
 #[ORM\Entity(repositoryClass: ExpenseRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
 #[ORM\Table(name: 'expense')]
 #[ORM\Index(name: 'idx_expense_date_category', columns: ['date', 'category_id'])]
@@ -71,7 +73,7 @@ class Expense
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $note = null;
 
-    /** Computed from the household's active member count at creation — not implemented yet, always defaults to 1 for now. */
+    /** Active member count of the household when the row was entered (1 if individual) — see AppliedDivisorListener. */
     #[ORM\Column(options: ['default' => 1])]
     #[ApiProperty(writable: false)]
     private int $appliedDivisor = 1;

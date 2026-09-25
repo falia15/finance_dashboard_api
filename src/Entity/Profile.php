@@ -34,7 +34,7 @@ class Profile
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(normalizer: 'trim')]
     #[Assert\Length(max: 255)]
     private ?string $name = null;
 

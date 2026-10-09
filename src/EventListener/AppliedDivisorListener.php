@@ -19,6 +19,9 @@ use Doctrine\ORM\Events;
  *
  * A `FixedExpenseAmount` takes the divisor of its fixed expense's
  * household when the month is created, and keeps it afterwards.
+ *
+ * The divisor is still frozen on a row assigned to one member (`member`
+ * set), it is only used when that row goes back to an equal split.
  */
 #[AsDoctrineListener(event: Events::onFlush)]
 final class AppliedDivisorListener

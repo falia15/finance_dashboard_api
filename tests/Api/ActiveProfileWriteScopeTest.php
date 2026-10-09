@@ -12,6 +12,7 @@ use App\Entity\Profile;
 final class ActiveProfileWriteScopeTest extends ApiTestCase
 {
     use HouseholdFixtures;
+    use IncomeFixtures;
 
     private Profile $alice;
     private Profile $bob;
@@ -31,7 +32,7 @@ final class ActiveProfileWriteScopeTest extends ApiTestCase
      */
     private function postIncome(array $owner, Profile $as): ?array
     {
-        return $this->request('POST', '/api/incomes', $owner + ['year' => 2026, 'month' => 9, 'netPay' => '1000.00'], self::activeProfile($as));
+        return $this->request('POST', '/api/incomes', $owner + ['year' => 2026, 'month' => 9, 'type' => $this->incomeTypeIri(), 'amount' => '1000.00'], self::activeProfile($as));
     }
 
     private static function iri(Profile|Household $entity): string
@@ -103,7 +104,7 @@ final class ActiveProfileWriteScopeTest extends ApiTestCase
 
     public function testWriteWithoutActiveProfileIsRejected(): void
     {
-        $this->request('POST', '/api/incomes', ['profile' => self::iri($this->alice), 'year' => 2026, 'month' => 9, 'netPay' => '1000.00']);
+        $this->request('POST', '/api/incomes', ['profile' => self::iri($this->alice), 'year' => 2026, 'month' => 9, 'type' => $this->incomeTypeIri(), 'amount' => '1000.00']);
 
         self::assertResponseStatusCodeSame(400);
     }

@@ -15,6 +15,7 @@ use App\Entity\Trait\TimestampableTrait;
 use App\Repository\IncomeRepository;
 use App\Validator\ExactlyOneOf;
 use App\Validator\InActiveProfileScope;
+use App\Validator\ValidSplitMember;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,9 +23,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
+#[ValidSplitMember]
 #[ORM\Table(name: 'income')]
-#[ORM\UniqueConstraint(name: 'uniq_income_profile_period_label', columns: ['profile_id', 'year', 'month', 'label'])]
-#[ORM\UniqueConstraint(name: 'uniq_income_household_period_label', columns: ['household_id', 'year', 'month', 'label'])]
+#[ORM\UniqueConstraint(name: 'uniq_income_profile_period_type', columns: ['profile_id', 'year', 'month', 'type_id'])]
+#[ORM\UniqueConstraint(name: 'uniq_income_household_period_type', columns: ['household_id', 'year', 'month', 'type_id'])]
 #[ApiResource(operations: [
     new GetCollection(),
     new Get(),
@@ -37,6 +39,7 @@ use Doctrine\ORM\Mapping as ORM;
     'household' => 'exact',
     'year' => 'exact',
     'month' => 'exact',
+    'type' => 'exact',
 ])]
 class Income
 {
@@ -55,26 +58,23 @@ class Income
     #[ORM\JoinColumn(nullable: true)]
     private ?Household $household = null;
 
+    /** Household member receiving the whole income; null = split equally between members. */
+    #[ORM\ManyToOne(targetEntity: HouseholdMember::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?HouseholdMember $member = null;
+
     #[ORM\Column]
     private ?int $year = null;
 
     #[ORM\Column]
     private ?int $month = null;
 
-    #[ORM\Column(length: 255, options: ['default' => 'Salary'])]
-    private string $label = 'Salary';
+    #[ORM\ManyToOne(targetEntity: IncomeType::class)]
+    #[ORM\JoinColumn(name: 'type_id', nullable: false)]
+    private ?IncomeType $type = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $netPay = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    private ?string $grossPay = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    private ?string $taxableIncome = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    private ?string $withholdingTax = null;
+    private ?string $amount = null;
 
     /** Active member count of the household when the row was entered (1 if individual) — see AppliedDivisorListener. */
     #[ORM\Column(options: ['default' => 1])]
@@ -110,6 +110,18 @@ class Income
         return $this;
     }
 
+    public function getMember(): ?HouseholdMember
+    {
+        return $this->member;
+    }
+
+    public function setMember(?HouseholdMember $member): static
+    {
+        $this->member = $member;
+
+        return $this;
+    }
+
     public function getYear(): ?int
     {
         return $this->year;
@@ -134,62 +146,26 @@ class Income
         return $this;
     }
 
-    public function getLabel(): string
+    public function getType(): ?IncomeType
     {
-        return $this->label;
+        return $this->type;
     }
 
-    public function setLabel(string $label): static
+    public function setType(?IncomeType $type): static
     {
-        $this->label = $label;
+        $this->type = $type;
 
         return $this;
     }
 
-    public function getNetPay(): ?string
+    public function getAmount(): ?string
     {
-        return $this->netPay;
+        return $this->amount;
     }
 
-    public function setNetPay(string $netPay): static
+    public function setAmount(string $amount): static
     {
-        $this->netPay = $netPay;
-
-        return $this;
-    }
-
-    public function getGrossPay(): ?string
-    {
-        return $this->grossPay;
-    }
-
-    public function setGrossPay(?string $grossPay): static
-    {
-        $this->grossPay = $grossPay;
-
-        return $this;
-    }
-
-    public function getTaxableIncome(): ?string
-    {
-        return $this->taxableIncome;
-    }
-
-    public function setTaxableIncome(?string $taxableIncome): static
-    {
-        $this->taxableIncome = $taxableIncome;
-
-        return $this;
-    }
-
-    public function getWithholdingTax(): ?string
-    {
-        return $this->withholdingTax;
-    }
-
-    public function setWithholdingTax(?string $withholdingTax): static
-    {
-        $this->withholdingTax = $withholdingTax;
+        $this->amount = $amount;
 
         return $this;
     }

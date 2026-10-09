@@ -11,6 +11,7 @@ use App\Entity\Profile;
 final class AppliedDivisorTest extends ApiTestCase
 {
     use HouseholdFixtures;
+    use IncomeFixtures;
 
     private Profile $alice;
 
@@ -28,7 +29,7 @@ final class AppliedDivisorTest extends ApiTestCase
      */
     private function postIncome(array $owner): ?array
     {
-        return $this->request('POST', '/api/incomes', $owner + ['year' => 2026, 'month' => 9, 'netPay' => '1000.00'], self::activeProfile($this->alice));
+        return $this->request('POST', '/api/incomes', $owner + ['year' => 2026, 'month' => 9, 'type' => $this->incomeTypeIri(), 'amount' => '1000.00'], self::activeProfile($this->alice));
     }
 
     public function testIndividualRowIsNotSplit(): void
@@ -59,7 +60,7 @@ final class AppliedDivisorTest extends ApiTestCase
 
         $this->request('PATCH', '/api/household_members/'.$partner->getId(), ['leftAt' => '2026-09-01'], self::activeProfile($this->alice));
         self::assertResponseIsSuccessful();
-        $this->request('PATCH', $income['@id'], ['netPay' => '1200.00'], self::activeProfile($this->alice));
+        $this->request('PATCH', $income['@id'], ['amount' => '1200.00'], self::activeProfile($this->alice));
 
         $this->entityManager()->clear();
         self::assertSame(2, $this->entityManager()->find(Income::class, $income['id'])->getAppliedDivisor());

@@ -14,6 +14,7 @@ use App\Entity\Trait\TimestampableTrait;
 use App\Repository\FixedExpenseRepository;
 use App\Validator\ExactlyOneOf;
 use App\Validator\InActiveProfileScope;
+use App\Validator\ValidSplitMember;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -25,6 +26,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
+#[ValidSplitMember]
 #[ApiResource(operations: [
     new GetCollection(),
     new Get(),
@@ -55,6 +57,11 @@ class FixedExpense
     #[ORM\ManyToOne(targetEntity: Household::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?Household $household = null;
+
+    /** Household member paying the whole fixed expense; null = split equally between members. */
+    #[ORM\ManyToOne(targetEntity: HouseholdMember::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?HouseholdMember $member = null;
 
     #[ORM\Column]
     private ?int $sortOrder = null;
@@ -96,6 +103,18 @@ class FixedExpense
     public function setHousehold(?Household $household): static
     {
         $this->household = $household;
+
+        return $this;
+    }
+
+    public function getMember(): ?HouseholdMember
+    {
+        return $this->member;
+    }
+
+    public function setMember(?HouseholdMember $member): static
+    {
+        $this->member = $member;
 
         return $this;
     }

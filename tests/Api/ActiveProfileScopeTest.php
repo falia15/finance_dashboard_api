@@ -14,6 +14,8 @@ use App\Http\ActiveProfileResolver;
  */
 final class ActiveProfileScopeTest extends ApiTestCase
 {
+    use IncomeFixtures;
+
     private Profile $alice;
     private Profile $bob;
 
@@ -25,15 +27,15 @@ final class ActiveProfileScopeTest extends ApiTestCase
         $this->bob = $this->persist((new Profile())->setName('Bob'));
     }
 
-    private function createIncome(string $label, ?Profile $profile = null, ?Household $household = null): Income
+    private function createIncome(string $amount, ?Profile $profile = null, ?Household $household = null): Income
     {
         return $this->persist((new Income())
             ->setProfile($profile)
             ->setHousehold($household)
             ->setYear(2026)
             ->setMonth(9)
-            ->setLabel($label)
-            ->setNetPay('1000.00'));
+            ->setType($this->incomeType())
+            ->setAmount($amount));
     }
 
     private function createHousehold(Profile $member, ?\DateTimeImmutable $leftAt = null): Household
@@ -50,17 +52,17 @@ final class ActiveProfileScopeTest extends ApiTestCase
     }
 
     /**
-     * @return list<string> labels of the incomes visible to the given profile
+     * @return list<string> amounts of the incomes visible to the given profile
      */
-    private function visibleIncomeLabels(Profile $activeProfile): array
+    private function visibleIncomeAmounts(Profile $activeProfile): array
     {
         $body = $this->request('GET', '/api/incomes', headers: [ActiveProfileResolver::HEADER => (string) $activeProfile->getId()]);
         self::assertResponseIsSuccessful();
 
-        $labels = array_column($body['member'], 'label');
-        sort($labels);
+        $amounts = array_column($body['member'], 'amount');
+        sort($amounts);
 
-        return $labels;
+        return $amounts;
     }
 
     public function testMissingHeaderIsRejected(): void
@@ -86,22 +88,22 @@ final class ActiveProfileScopeTest extends ApiTestCase
 
     public function testCollectionOnlyContainsTheActiveProfileRows(): void
     {
-        $this->createIncome('Alice salary', profile: $this->alice);
-        $this->createIncome('Bob salary', profile: $this->bob);
+        $this->createIncome('1000.00', profile: $this->alice);
+        $this->createIncome('2000.00', profile: $this->bob);
 
-        self::assertSame(['Alice salary'], $this->visibleIncomeLabels($this->alice));
-        self::assertSame(['Bob salary'], $this->visibleIncomeLabels($this->bob));
+        self::assertSame(['1000.00'], $this->visibleIncomeAmounts($this->alice));
+        self::assertSame(['2000.00'], $this->visibleIncomeAmounts($this->bob));
     }
 
     public function testItemOfAnotherProfileIsNotFound(): void
     {
-        $bobIncome = $this->createIncome('Bob salary', profile: $this->bob);
+        $bobIncome = $this->createIncome('2000.00', profile: $this->bob);
         $headers = [ActiveProfileResolver::HEADER => (string) $this->alice->getId()];
 
         $this->request('GET', '/api/incomes/'.$bobIncome->getId(), headers: $headers);
         self::assertResponseStatusCodeSame(404);
 
-        $this->request('PATCH', '/api/incomes/'.$bobIncome->getId(), ['label' => 'Hijacked'], $headers);
+        $this->request('PATCH', '/api/incomes/'.$bobIncome->getId(), ['amount' => '1.00'], $headers);
         self::assertResponseStatusCodeSame(404);
 
         $this->request('DELETE', '/api/incomes/'.$bobIncome->getId(), headers: $headers);
@@ -111,17 +113,17 @@ final class ActiveProfileScopeTest extends ApiTestCase
     public function testHouseholdRowsAreVisibleToActiveMembersOnly(): void
     {
         $household = $this->createHousehold($this->alice);
-        $this->createIncome('Shared', household: $household);
+        $this->createIncome('3000.00', household: $household);
 
-        self::assertSame(['Shared'], $this->visibleIncomeLabels($this->alice));
-        self::assertSame([], $this->visibleIncomeLabels($this->bob));
+        self::assertSame(['3000.00'], $this->visibleIncomeAmounts($this->alice));
+        self::assertSame([], $this->visibleIncomeAmounts($this->bob));
     }
 
     public function testHouseholdRowsAreHiddenOnceTheMemberLeft(): void
     {
         $household = $this->createHousehold($this->alice, leftAt: new \DateTimeImmutable('2026-06-01'));
-        $this->createIncome('Shared', household: $household);
+        $this->createIncome('3000.00', household: $household);
 
-        self::assertSame([], $this->visibleIncomeLabels($this->alice));
+        self::assertSame([], $this->visibleIncomeAmounts($this->alice));
     }
 }

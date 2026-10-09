@@ -16,6 +16,7 @@ use App\Entity\Trait\TimestampableTrait;
 use App\Repository\ExpenseRepository;
 use App\Validator\ExactlyOneOf;
 use App\Validator\InActiveProfileScope;
+use App\Validator\ValidSplitMember;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -24,6 +25,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
+#[ValidSplitMember]
 #[ORM\Table(name: 'expense')]
 #[ORM\Index(name: 'idx_expense_date_category', columns: ['date', 'category_id'])]
 #[ApiResource(operations: [
@@ -55,6 +57,11 @@ class Expense
     #[ORM\ManyToOne(targetEntity: Household::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?Household $household = null;
+
+    /** Household member paying the whole expense; null = split equally between members. */
+    #[ORM\ManyToOne(targetEntity: HouseholdMember::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?HouseholdMember $member = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeImmutable $date = null;
@@ -103,6 +110,18 @@ class Expense
     public function setHousehold(?Household $household): static
     {
         $this->household = $household;
+
+        return $this;
+    }
+
+    public function getMember(): ?HouseholdMember
+    {
+        return $this->member;
+    }
+
+    public function setMember(?HouseholdMember $member): static
+    {
+        $this->member = $member;
 
         return $this;
     }

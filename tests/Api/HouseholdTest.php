@@ -10,6 +10,7 @@ use App\Entity\Profile;
 final class HouseholdTest extends ApiTestCase
 {
     use HouseholdFixtures;
+    use IncomeFixtures;
 
     private Profile $alice;
     private Profile $bob;
@@ -135,7 +136,7 @@ final class HouseholdTest extends ApiTestCase
     public function testDeleteWithAttachedRowsIsRejected(): void
     {
         $household = $this->createHousehold($this->alice);
-        $this->persist((new Income())->setHousehold($household)->setYear(2026)->setMonth(9)->setNetPay('1000.00'));
+        $this->persist((new Income())->setHousehold($household)->setYear(2026)->setMonth(9)->setType($this->incomeType())->setAmount('1000.00'));
 
         $body = $this->request('DELETE', '/api/households/'.$household->getId(), headers: self::activeProfile($this->alice));
 

@@ -17,6 +17,7 @@ use App\Security\HouseholdVoter;
 use App\State\HouseholdMemberAddProcessor;
 use App\State\HouseholdMemberUpdateProcessor;
 use App\Validator\ExactlyOneOf;
+use App\Validator\MemberHasNoEntries;
 use App\Validator\NotHouseholdOwner;
 use App\Validator\ValidHouseholdMembership;
 use Doctrine\DBAL\Types\Types;
@@ -25,14 +26,16 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Listed and added through the `/households/{householdId}/members`
  * sub-resource. Standard item routes: read one, detach (`leftAt`),
- * transfer ownership (`isOwner`), or delete a mistaken entry. Only the
- * household's active owner can change its members.
+ * transfer ownership (`isOwner`), or delete a mistaken entry (not once
+ * rows are assigned to it). Only the household's active owner can change
+ * its members.
  */
 #[ORM\Entity(repositoryClass: HouseholdMemberRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ExactlyOneOf(first: 'profile', second: 'externalLabel')]
 #[ValidHouseholdMembership]
 #[NotHouseholdOwner(groups: ['delete'])]
+#[MemberHasNoEntries(groups: ['delete'])]
 #[ApiResource(operations: [
     new GetCollection(
         uriTemplate: '/households/{householdId}/members',

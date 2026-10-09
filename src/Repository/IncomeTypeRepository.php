@@ -15,4 +15,15 @@ class IncomeTypeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, IncomeType::class);
     }
+
+    /** Sort order placing a new type after the existing ones. */
+    public function nextSortOrder(): int
+    {
+        $max = $this->createQueryBuilder('t')
+            ->select('MAX(t.sortOrder)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return null === $max ? 0 : (int) $max + 1;
+    }
 }

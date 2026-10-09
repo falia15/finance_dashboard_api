@@ -2,32 +2,50 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Dto\IncomeTypeReorderInput;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\IncomeTypeRepository;
+use App\State\IncomeTypeCreateProcessor;
+use App\State\IncomeTypeReorderProcessor;
+use App\Validator\IncomeTypeNotInUse;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Kind of income (salary, rental income, family allowance...), managed
- * like ExpenseCategory so incomes can be filtered by type.
+ * Kind of income (salary, rental income, family allowance...), shared by
+ * every profile, managed like ExpenseCategory so incomes can be filtered by
+ * type.
  *
- * `sortOrder` is client-writable for now, same as ExpenseCategory.
+ * `sortOrder` isn't writable: a new type goes at the end, and the list is
+ * reordered as a whole through `PATCH /income_types/reorder`. A type used by
+ * an income can't be deleted.
  */
 #[ORM\Entity(repositoryClass: IncomeTypeRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[IncomeTypeNotInUse(groups: ['delete'])]
 #[ApiResource(
     operations: [
-        new GetCollection(order: ['sortOrder' => 'ASC']),
+        new GetCollection(order: ['sortOrder' => 'ASC', 'id' => 'ASC']),
         new Get(),
-        new Post(),
+        new Post(processor: IncomeTypeCreateProcessor::class),
+        // Before `/income_types/{id}` so that "reorder" isn't read as an id
+        new Patch(
+            uriTemplate: '/income_types/reorder',
+            status: 204,
+            input: IncomeTypeReorderInput::class,
+            output: false,
+            read: false,
+            processor: IncomeTypeReorderProcessor::class,
+        ),
         new Patch(),
-        new Delete(),
+        new Delete(validate: true, validationContext: ['groups' => ['delete']]),
     ],
 )]
 class IncomeType
@@ -49,7 +67,7 @@ class IncomeType
 
     /** `order` avoided — reserved SQL keyword. */
     #[ORM\Column]
-    #[Assert\NotNull]
+    #[ApiProperty(writable: false)]
     private ?int $sortOrder = null;
 
     public function getId(): ?int

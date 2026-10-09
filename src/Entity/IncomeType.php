@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\IncomeTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Kind of income (salary, rental income, family allowance...), managed
@@ -39,6 +40,8 @@ class IncomeType
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(normalizer: 'trim')]
+    #[Assert\Length(max: 255)]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -46,6 +49,7 @@ class IncomeType
 
     /** `order` avoided — reserved SQL keyword. */
     #[ORM\Column]
+    #[Assert\NotNull]
     private ?int $sortOrder = null;
 
     public function getId(): ?int

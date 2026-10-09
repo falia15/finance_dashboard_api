@@ -35,6 +35,19 @@ class HouseholdMemberRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return list<HouseholdMember> the profile's current (not left) memberships, one per household
+     */
+    public function findActiveMembershipsOf(Profile $profile): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.profile = :profile')
+            ->andWhere('m.leftAt IS NULL')
+            ->setParameter('profile', $profile)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Active members (real or external), i.e. the household's current split divisor.
      */
     public function countActiveMembers(Household $household): int

@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
@@ -18,17 +19,26 @@ use App\Validator\InActiveProfileScope;
 use App\Validator\ValidSplitMember;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: IncomeRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
 #[ValidSplitMember]
+// One row per period and type for an owner; each check is skipped when its owner is null
+#[UniqueEntity(fields: ['profile', 'year', 'month', 'type'], message: 'This profile already has an income of this type for this month.', errorPath: 'type')]
+#[UniqueEntity(fields: ['household', 'year', 'month', 'type'], message: 'This household already has an income of this type for this month.', errorPath: 'type')]
 #[ORM\Table(name: 'income')]
 #[ORM\UniqueConstraint(name: 'uniq_income_profile_period_type', columns: ['profile_id', 'year', 'month', 'type_id'])]
 #[ORM\UniqueConstraint(name: 'uniq_income_household_period_type', columns: ['household_id', 'year', 'month', 'type_id'])]
 #[ApiResource(operations: [
     new GetCollection(),
+    new GetCollection(
+        uriTemplate: '/households/{householdId}/incomes',
+        uriVariables: ['householdId' => new Link(fromClass: Household::class, toProperty: 'household')],
+    ),
     new Get(),
     new Post(),
     new Patch(),
@@ -64,16 +74,24 @@ class Income
     private ?HouseholdMember $member = null;
 
     #[ORM\Column]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 2000, max: 2100)]
     private ?int $year = null;
 
     #[ORM\Column]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 1, max: 12)]
     private ?int $month = null;
 
     #[ORM\ManyToOne(targetEntity: IncomeType::class)]
     #[ORM\JoinColumn(name: 'type_id', nullable: false)]
+    #[Assert\NotNull]
     private ?IncomeType $type = null;
 
+    /** Never negative: a correction is entered by lowering the month's amount. */
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
     private ?string $amount = null;
 
     /** Active member count of the household when the row was entered (1 if individual) — see AppliedDivisorListener. */

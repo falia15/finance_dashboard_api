@@ -16,10 +16,10 @@ use App\Repository\HouseholdMemberRepository;
 use App\Security\HouseholdVoter;
 use App\State\HouseholdMemberAddProcessor;
 use App\State\HouseholdMemberUpdateProcessor;
-use App\Validator\ExactlyOneOf;
-use App\Validator\MemberHasNoEntries;
-use App\Validator\NotHouseholdOwner;
-use App\Validator\ValidHouseholdMembership;
+use App\Validator\Common\ExactlyOneOf;
+use App\Validator\Household\MemberHasNoEntries;
+use App\Validator\Household\NotHouseholdOwner;
+use App\Validator\Household\ValidHouseholdMembership;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

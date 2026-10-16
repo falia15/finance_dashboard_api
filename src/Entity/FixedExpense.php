@@ -12,9 +12,9 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\FixedExpenseRepository;
-use App\Validator\ExactlyOneOf;
-use App\Validator\InActiveProfileScope;
-use App\Validator\ValidSplitMember;
+use App\Validator\Common\ExactlyOneOf;
+use App\Validator\Household\ValidSplitMember;
+use App\Validator\Profile\InActiveProfileScope;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

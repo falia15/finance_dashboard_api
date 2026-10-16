@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\Household;
 
 use Symfony\Component\Validator\Constraint;
 

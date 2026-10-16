@@ -3,7 +3,7 @@
 namespace App\Dto;
 
 use App\Entity\IncomeType;
-use App\Validator\CompleteIncomeTypeOrder;
+use App\Validator\IncomeType\CompleteIncomeTypeOrder;
 
 /**
  * Payload of `PATCH /income_types/reorder`: every income type IRI, in the

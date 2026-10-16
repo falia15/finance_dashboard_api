@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\Household;
 
 use App\Entity\Expense;
 use App\Entity\FixedExpense;
-use App\Entity\Household;
+use App\Entity\HouseholdMember;
 use App\Entity\Income;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Constraint;
@@ -13,10 +13,10 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
- * A household is only deleted once nothing references it anymore — its
- * rows are never cascaded nor silently moved to a profile.
+ * A member a row is assigned to (`member`) is never deleted: the row
+ * would silently fall back to an equal split. Detach it (`leftAt`) instead.
  */
-class HouseholdHasNoEntriesValidator extends ConstraintValidator
+class MemberHasNoEntriesValidator extends ConstraintValidator
 {
     private const ENTRY_CLASSES = [Income::class, Expense::class, FixedExpense::class];
 
@@ -26,16 +26,16 @@ class HouseholdHasNoEntriesValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if (!$constraint instanceof HouseholdHasNoEntries) {
-            throw new UnexpectedTypeException($constraint, HouseholdHasNoEntries::class);
+        if (!$constraint instanceof MemberHasNoEntries) {
+            throw new UnexpectedTypeException($constraint, MemberHasNoEntries::class);
         }
 
-        if (!$value instanceof Household) {
-            throw new UnexpectedValueException($value, Household::class);
+        if (!$value instanceof HouseholdMember) {
+            throw new UnexpectedValueException($value, HouseholdMember::class);
         }
 
         foreach (self::ENTRY_CLASSES as $entryClass) {
-            if ($this->entityManager->getRepository($entryClass)->count(['household' => $value]) > 0) {
+            if ($this->entityManager->getRepository($entryClass)->count(['member' => $value]) > 0) {
                 $this->context->buildViolation($constraint->message)
                     ->addViolation();
 

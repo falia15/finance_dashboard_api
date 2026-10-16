@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\IncomeType;
 
 use Symfony\Component\Validator\Constraint;
 

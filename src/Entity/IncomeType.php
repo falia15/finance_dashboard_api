@@ -14,7 +14,7 @@ use App\Entity\Trait\TimestampableTrait;
 use App\Repository\IncomeTypeRepository;
 use App\State\IncomeTypeCreateProcessor;
 use App\State\IncomeTypeReorderProcessor;
-use App\Validator\IncomeTypeNotInUse;
+use App\Validator\IncomeType\IncomeTypeNotInUse;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 

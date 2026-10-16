@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\Household;
 
 use App\Entity\HouseholdMember;
 use Doctrine\ORM\EntityManagerInterface;

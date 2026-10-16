@@ -22,7 +22,7 @@ use Doctrine\ORM\QueryBuilder;
  * the households it is an active real member of — and those households
  * and their members themselves.
  *
- * Writes are checked by App\Validator\InActiveProfileScope.
+ * Writes are checked by App\Validator\Profile\InActiveProfileScope.
  */
 final class ActiveProfileExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {

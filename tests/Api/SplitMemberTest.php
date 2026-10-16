@@ -8,8 +8,8 @@ use App\Entity\Income;
 use App\Entity\Profile;
 
 /**
- * Covers App\Validator\ValidSplitMember through `Income` (shared by
- * `Expense` and `FixedExpense`), and App\Validator\MemberHasNoEntries.
+ * Covers App\Validator\Household\ValidSplitMember through `Income` (shared by
+ * `Expense` and `FixedExpense`), and App\Validator\Household\MemberHasNoEntries.
  */
 final class SplitMemberTest extends ApiTestCase
 {

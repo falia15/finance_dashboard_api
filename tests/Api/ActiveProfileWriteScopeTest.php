@@ -6,7 +6,7 @@ use App\Entity\Household;
 use App\Entity\Profile;
 
 /**
- * Covers App\Validator\InActiveProfileScope through `Income` and `Note`,
+ * Covers App\Validator\Profile\InActiveProfileScope through `Income` and `Note`,
  * the other scoped resources share the same constraint.
  */
 final class ActiveProfileWriteScopeTest extends ApiTestCase

@@ -12,7 +12,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\NoteRepository;
-use App\Validator\InActiveProfileScope;
+use App\Validator\Profile\InActiveProfileScope;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

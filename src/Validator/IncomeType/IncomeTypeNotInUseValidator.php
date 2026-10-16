@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\IncomeType;
 
 use App\Entity\IncomeType;
 use App\Repository\IncomeRepository;

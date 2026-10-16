@@ -16,7 +16,7 @@ use App\Entity\Trait\TimestampableTrait;
 use App\Repository\HouseholdRepository;
 use App\Security\HouseholdVoter;
 use App\State\HouseholdCreateProcessor;
-use App\Validator\HouseholdHasNoEntries;
+use App\Validator\Household\HouseholdHasNoEntries;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

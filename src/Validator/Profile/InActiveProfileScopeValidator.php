@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\Profile;
 
 use App\Http\ActiveProfileResolver;
 use App\Repository\HouseholdMemberRepository;

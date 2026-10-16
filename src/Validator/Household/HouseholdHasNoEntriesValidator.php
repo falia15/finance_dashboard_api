@@ -13,8 +13,8 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
- * A household is only deleted once nothing references it anymore — its
- * rows are never cascaded nor silently moved to a profile.
+ * Prevent removing a household when an income and/or an expense is still attached to it.
+ * A household is only deleted once nothing references it anymore.
  */
 class HouseholdHasNoEntriesValidator extends ConstraintValidator
 {

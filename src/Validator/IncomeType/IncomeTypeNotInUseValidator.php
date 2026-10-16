@@ -10,8 +10,8 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
- * An income type is only deleted once no income uses it — no reassignment
- * for now, the user changes those incomes first.
+ * Prevents removing an income type while an income still uses it.
+ * The user must first change the type of those incomes.
  */
 class IncomeTypeNotInUseValidator extends ConstraintValidator
 {

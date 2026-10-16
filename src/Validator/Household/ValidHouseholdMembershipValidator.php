@@ -10,13 +10,12 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
- * - the owner is a real profile, and an active member (it can't leave);
- * - ownership is only ever transferred (isOwner set on another member,
- *   see HouseholdMemberUpdateProcessor), never just removed;
- * - `leftAt` is on or after `joinedAt`, and final once set (history).
- *
- * Previous values are read from Doctrine's original data, empty for a
- * member being created.
+ * Prevent creating a householdMembership that does not respect the following rules:
+ * - Give the household ownership to an external member.
+ * - Make the owner leave.
+ * - Leave the household without an owner.
+ * - Make a member who left come back, or change their departure date.
+ * - Set a departure date before the join date.
  */
 class ValidHouseholdMembershipValidator extends ConstraintValidator
 {

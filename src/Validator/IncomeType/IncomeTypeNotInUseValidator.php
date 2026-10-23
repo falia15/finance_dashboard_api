@@ -29,11 +29,21 @@ class IncomeTypeNotInUseValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, IncomeType::class);
         }
 
-        $count = $this->incomeRepository->count(['type' => $value]);
-        if ($count > 0) {
+        $count = $this->countIncomesUsing($value);
+        if ($this->isInUse($count)) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ count }}', (string) $count)
                 ->addViolation();
         }
+    }
+
+    private function countIncomesUsing(IncomeType $type): int
+    {
+        return $this->incomeRepository->count(['type' => $type]);
+    }
+
+    private function isInUse(int $incomeCount): bool
+    {
+        return $incomeCount > 0;
     }
 }

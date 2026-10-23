@@ -20,6 +20,7 @@ class NotHouseholdOwnerValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, HouseholdMember::class);
         }
 
+        // The owner can't be removed from the household
         if ($value->isOwner()) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();

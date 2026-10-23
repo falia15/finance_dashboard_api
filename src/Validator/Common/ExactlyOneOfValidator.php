@@ -23,7 +23,7 @@ class ExactlyOneOfValidator extends ConstraintValidator
         $first = $accessor->getValue($value, $constraint->first);
         $second = $accessor->getValue($value, $constraint->second);
 
-        if (($first === null) !== ($second === null)) {
+        if ($this->isExactlyOneSet($first, $second)) {
             return;
         }
 
@@ -32,5 +32,10 @@ class ExactlyOneOfValidator extends ConstraintValidator
             ->setParameter('{{ second }}', $constraint->second)
             ->atPath($constraint->first)
             ->addViolation();
+    }
+
+    private function isExactlyOneSet(mixed $first, mixed $second): bool
+    {
+        return ($first === null) !== ($second === null);
     }
 }

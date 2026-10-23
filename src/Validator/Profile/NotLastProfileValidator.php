@@ -25,9 +25,14 @@ class NotLastProfileValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, Profile::class);
         }
 
-        if ($this->profileRepository->count() <= 1) {
+        if ($this->isLastProfile()) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
         }
+    }
+
+    private function isLastProfile(): bool
+    {
+        return $this->profileRepository->count() <= 1;
     }
 }

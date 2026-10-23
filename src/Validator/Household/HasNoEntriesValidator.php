@@ -34,13 +34,23 @@ class HasNoEntriesValidator extends ConstraintValidator
             return;
         }
 
-        foreach (self::ENTRY_CLASSES as $entryClass) {
-            if ($this->entityManager->getRepository($entryClass)->count([$constraint->field => $value]) > 0) {
-                $this->context->buildViolation($constraint->message)
-                    ->addViolation();
+        if ($this->isReferencedByAnEntry($constraint->field, $value)) {
+            $this->context->buildViolation($constraint->message)
+                ->addViolation();
+        }
+    }
 
-                return;
+    /**
+     * True when at least one income, expense or fixed expense has `$value` in its `$field`.
+     */
+    private function isReferencedByAnEntry(string $field, mixed $value): bool
+    {
+        foreach (self::ENTRY_CLASSES as $entryClass) {
+            if ($this->entityManager->getRepository($entryClass)->count([$field => $value]) > 0) {
+                return true;
             }
         }
+
+        return false;
     }
 }

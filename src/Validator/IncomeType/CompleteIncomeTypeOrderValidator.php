@@ -24,19 +24,29 @@ class CompleteIncomeTypeOrderValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, CompleteIncomeTypeOrder::class);
         }
 
-        $ids = array_map(
-            static fn (IncomeType $type) => $type->getId(),
-            is_array($value) ? $value : []
-        );
-        $allIds = array_map(
-            static fn (IncomeType $type) => $type->getId(),
-            $this->incomeTypeRepository->findAll()
-        );
-        sort($ids);
-        sort($allIds);
+        $types = is_array($value) ? $value : [];
 
-        if ($ids !== $allIds) {
+        if (!$this->listsEveryIncomeTypeOnce($types)) {
             $this->context->buildViolation($constraint->message)->addViolation();
         }
+    }
+
+    /**
+     * @param IncomeType[] $types
+     */
+    private function listsEveryIncomeTypeOnce(array $types): bool
+    {
+        return $this->getSortedIds($types) === $this->getSortedIds($this->incomeTypeRepository->findAll());
+    }
+
+    /**
+     * @param IncomeType[] $types
+     */
+    private function getSortedIds(array $types): array
+    {
+        $ids = array_map(static fn (IncomeType $type) => $type->getId(), $types);
+        sort($ids);
+
+        return $ids;
     }
 }

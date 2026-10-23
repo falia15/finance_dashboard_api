@@ -34,26 +34,62 @@ class ValidHouseholdMembershipValidator extends ConstraintValidator
         }
 
         $original = $this->entityManager->getUnitOfWork()->getOriginalEntityData($value);
-        $wasOwner = $original['isOwner'] ?? false;
-        $previousLeftAt = $original['leftAt'] ?? null;
 
-        if ($value->isOwner() && null === $value->getProfile()) {
+        if ($this->isExternalOwner($value)) {
             $this->addViolation($constraint->externalOwnerMessage, 'isOwner');
         }
 
-        if ($value->isOwner() && null !== $value->getLeftAt()) {
+        if ($this->isOwnerLeaving($value)) {
             $this->addViolation($constraint->inactiveOwnerMessage, 'leftAt');
         }
 
-        if ($wasOwner && !$value->isOwner()) {
+        if ($this->isOwnershipRemoved($value, $original)) {
             $this->addViolation($constraint->ownerRequiredMessage, 'isOwner');
         }
 
-        if (null !== $previousLeftAt && $previousLeftAt != $value->getLeftAt()) {
+        if ($this->isLeftAtChangedAfterLeaving($value, $original)) {
             $this->addViolation($constraint->leftAtLockedMessage, 'leftAt');
-        } elseif (null !== $value->getLeftAt() && null !== $value->getJoinedAt() && $value->getLeftAt() < $value->getJoinedAt()) {
+        } elseif ($this->isLeftBeforeJoined($value)) {
             $this->addViolation($constraint->leftBeforeJoinedMessage, 'leftAt');
         }
+    }
+
+    /**
+     * An external member has no profile.
+     */
+    private function isExternalOwner(HouseholdMember $member): bool
+    {
+        return $member->isOwner() && null === $member->getProfile();
+    }
+
+    private function isOwnerLeaving(HouseholdMember $member): bool
+    {
+        return $member->isOwner() && null !== $member->getLeftAt();
+    }
+
+    /**
+     * Ownership can only be transferred by making another member owner, never just removed.
+     */
+    private function isOwnershipRemoved(HouseholdMember $member, array $original): bool
+    {
+        $wasOwner = $original['isOwner'] ?? false;
+        return $wasOwner && !$member->isOwner();
+    }
+
+    /**
+     * Once a member has left, their departure date is locked.
+     */
+    private function isLeftAtChangedAfterLeaving(HouseholdMember $member, array $original): bool
+    {
+        $previousLeftAt = $original['leftAt'] ?? null;
+        return null !== $previousLeftAt && $previousLeftAt != $member->getLeftAt();
+    }
+
+    private function isLeftBeforeJoined(HouseholdMember $member): bool
+    {
+        return null !== $member->getLeftAt()
+            && null !== $member->getJoinedAt()
+            && $member->getLeftAt() < $member->getJoinedAt();
     }
 
     private function addViolation(string $message, string $path): void

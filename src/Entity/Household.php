@@ -16,7 +16,7 @@ use App\Entity\Trait\TimestampableTrait;
 use App\Repository\HouseholdRepository;
 use App\Security\HouseholdVoter;
 use App\State\HouseholdCreateProcessor;
-use App\Validator\Household\HouseholdHasNoEntries;
+use App\Validator\Household\HasNoEntries;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Entity(repositoryClass: HouseholdRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[HouseholdHasNoEntries(groups: ['delete'])]
+#[HasNoEntries(field: 'household', groups: ['delete'])]
 #[ApiResource(operations: [
     new GetCollection(),
     new GetCollection(

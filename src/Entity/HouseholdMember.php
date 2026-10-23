@@ -17,7 +17,7 @@ use App\Security\HouseholdVoter;
 use App\State\HouseholdMemberAddProcessor;
 use App\State\HouseholdMemberUpdateProcessor;
 use App\Validator\Common\ExactlyOneOf;
-use App\Validator\Household\MemberHasNoEntries;
+use App\Validator\Household\HasNoEntries;
 use App\Validator\Household\NotHouseholdOwner;
 use App\Validator\Household\ValidHouseholdMembership;
 use Doctrine\DBAL\Types\Types;
@@ -35,7 +35,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ExactlyOneOf(first: 'profile', second: 'externalLabel')]
 #[ValidHouseholdMembership]
 #[NotHouseholdOwner(groups: ['delete'])]
-#[MemberHasNoEntries(groups: ['delete'])]
+#[HasNoEntries(field: 'member', groups: ['delete'])]
 #[ApiResource(operations: [
     new GetCollection(
         uriTemplate: '/households/{householdId}/members',

@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         uriTemplate: '/profiles/{profileId}/incomes',
         uriVariables: ['profileId'],
         provider: ProfileIncomeYearProvider::class,
-        // Keeps `member: null` (equal split) in householdShares
+        // Keeps `householdMember: null` (equal split) in householdShares
         normalizationContext: ['skip_null_values' => false],
         parameters: [
             'year' => new QueryParameter(

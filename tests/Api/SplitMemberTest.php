@@ -49,23 +49,23 @@ final class SplitMemberTest extends ApiTestCase
         $body = $this->postIncome(['household' => self::iri($this->household)]);
 
         self::assertResponseStatusCodeSame(201);
-        self::assertNull($body['member'] ?? null);
+        self::assertNull($body['householdMember'] ?? null);
     }
 
     public function testHouseholdRowCanBeAssignedToOneMember(): void
     {
-        $body = $this->postIncome(['household' => self::iri($this->household), 'member' => self::iri($this->partner)]);
+        $body = $this->postIncome(['household' => self::iri($this->household), 'householdMember' => self::iri($this->partner)]);
 
         self::assertResponseStatusCodeSame(201);
-        self::assertSame(self::iri($this->partner), $body['member']);
+        self::assertSame(self::iri($this->partner), $body['householdMember']);
     }
 
     public function testMemberRequiresAHousehold(): void
     {
-        $body = $this->postIncome(['profile' => '/api/profiles/'.$this->alice->getId(), 'member' => self::iri($this->partner)]);
+        $body = $this->postIncome(['profile' => '/api/profiles/'.$this->alice->getId(), 'householdMember' => self::iri($this->partner)]);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertContains('member', self::violationPaths($body));
+        self::assertContains('householdMember', self::violationPaths($body));
     }
 
     public function testMemberOfAnotherHouseholdIsRejected(): void
@@ -73,25 +73,25 @@ final class SplitMemberTest extends ApiTestCase
         $other = $this->createHousehold($this->alice, 'Flatshare');
         $roommate = $this->addMember($other, externalLabel: 'Roommate');
 
-        $body = $this->postIncome(['household' => self::iri($this->household), 'member' => self::iri($roommate)]);
+        $body = $this->postIncome(['household' => self::iri($this->household), 'householdMember' => self::iri($roommate)]);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertContains('member', self::violationPaths($body));
+        self::assertContains('householdMember', self::violationPaths($body));
     }
 
     public function testMemberWhoLeftCannotBePicked(): void
     {
         $former = $this->addMember($this->household, externalLabel: 'Former', leftAt: new \DateTimeImmutable('2026-06-01'));
 
-        $body = $this->postIncome(['household' => self::iri($this->household), 'member' => self::iri($former)]);
+        $body = $this->postIncome(['household' => self::iri($this->household), 'householdMember' => self::iri($former)]);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertContains('member', self::violationPaths($body));
+        self::assertContains('householdMember', self::violationPaths($body));
     }
 
     public function testRowKeepsItsMemberAfterTheMemberLeft(): void
     {
-        $income = $this->postIncome(['household' => self::iri($this->household), 'member' => self::iri($this->partner)]);
+        $income = $this->postIncome(['household' => self::iri($this->household), 'householdMember' => self::iri($this->partner)]);
         $this->request('PATCH', self::iri($this->partner), ['leftAt' => '2026-09-30'], self::activeProfile($this->alice));
         self::assertResponseIsSuccessful();
 
@@ -104,7 +104,7 @@ final class SplitMemberTest extends ApiTestCase
     {
         $this->persist((new Income())
             ->setHousehold($this->household)
-            ->setMember($this->partner)
+            ->setHouseholdMember($this->partner)
             ->setYear(2026)
             ->setMonth(9)
             ->setType($this->incomeType())

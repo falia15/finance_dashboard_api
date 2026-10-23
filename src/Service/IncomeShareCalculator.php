@@ -42,7 +42,7 @@ final class IncomeShareCalculator
     public function shareFor(Income $income, HouseholdMember $viewer): string
     {
         $amount = $income->getAmount() ?? '0.00';
-        $member = $income->getMember();
+        $member = $income->getHouseholdMember();
 
         if (null !== $member) {
             return $member === $viewer ? self::fromCents(self::toCents($amount)) : '0.00';

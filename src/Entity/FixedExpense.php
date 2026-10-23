@@ -61,7 +61,7 @@ class FixedExpense
     /** Household member paying the whole fixed expense; null = split equally between members. */
     #[ORM\ManyToOne(targetEntity: HouseholdMember::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private ?HouseholdMember $member = null;
+    private ?HouseholdMember $householdMember = null;
 
     #[ORM\Column]
     private ?int $sortOrder = null;
@@ -107,14 +107,14 @@ class FixedExpense
         return $this;
     }
 
-    public function getMember(): ?HouseholdMember
+    public function getHouseholdMember(): ?HouseholdMember
     {
-        return $this->member;
+        return $this->householdMember;
     }
 
-    public function setMember(?HouseholdMember $member): static
+    public function setHouseholdMember(?HouseholdMember $householdMember): static
     {
-        $this->member = $member;
+        $this->householdMember = $householdMember;
 
         return $this;
     }

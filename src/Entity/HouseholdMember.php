@@ -35,7 +35,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ExactlyOneOf(first: 'profile', second: 'externalLabel')]
 #[ValidHouseholdMembership]
 #[NotHouseholdOwner(groups: ['delete'])]
-#[HasNoEntries(field: 'member', groups: ['delete'])]
+#[HasNoEntries(field: 'householdMember', groups: ['delete'])]
 #[ApiResource(operations: [
     new GetCollection(
         uriTemplate: '/households/{householdId}/members',

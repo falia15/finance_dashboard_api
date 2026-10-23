@@ -5,7 +5,7 @@ namespace App\Validator\Household;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * Rules of the `member` field of a household row — see the validator.
+ * Rules of the `householdMember` field of a household row — see the validator.
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class ValidSplitMember extends Constraint

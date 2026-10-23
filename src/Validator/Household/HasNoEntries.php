@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class HasNoEntries extends Constraint
 {
-    public string $message = 'This {{ field }} is still referenced by incomes, expenses or fixed expenses and cannot be deleted.';
+    public string $message = 'This resource is still referenced by incomes, expenses or fixed expenses and cannot be deleted.';
 
     public function __construct(
         public readonly string $field,

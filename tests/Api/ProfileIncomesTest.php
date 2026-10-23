@@ -54,7 +54,7 @@ final class ProfileIncomesTest extends ApiTestCase
     {
         $this->request('POST', '/api/incomes', [
             'household' => '/api/households/'.$household->getId(),
-            'member' => null === $member ? null : '/api/household_members/'.$member->getId(),
+            'householdMember' => null === $member ? null : '/api/household_members/'.$member->getId(),
             'year' => 2026,
             'month' => $month,
             'type' => $this->incomeTypeIri(),
@@ -137,8 +137,8 @@ final class ProfileIncomesTest extends ApiTestCase
         self::assertSame('/api/households/'.$household->getId(), $share['household']);
         self::assertSame('45.01', $share['amount']);
         self::assertSame(2, $share['appliedDivisor']);
-        self::assertArrayHasKey('member', $share);
-        self::assertNull($share['member']);
+        self::assertArrayHasKey('householdMember', $share);
+        self::assertNull($share['householdMember']);
         self::assertSame('22.51', $share['share']);
         self::assertSame('22.51', self::month($body, 3)['total']);
     }
@@ -167,7 +167,7 @@ final class ProfileIncomesTest extends ApiTestCase
 
         self::assertSame('150.00', self::month($body, 4)['householdShares'][0]['share']);
         $partnerRow = self::month($body, 5)['householdShares'][0];
-        self::assertSame('/api/household_members/'.$partner->getId(), $partnerRow['member']);
+        self::assertSame('/api/household_members/'.$partner->getId(), $partnerRow['householdMember']);
         self::assertSame('0.00', $partnerRow['share']);
         self::assertSame(['individual' => '0.00', 'householdShare' => '150.00', 'total' => '150.00'], self::withoutType($body['totals']));
     }

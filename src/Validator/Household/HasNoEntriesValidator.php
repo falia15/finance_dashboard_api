@@ -37,7 +37,6 @@ class HasNoEntriesValidator extends ConstraintValidator
         foreach (self::ENTRY_CLASSES as $entryClass) {
             if ($this->entityManager->getRepository($entryClass)->count([$constraint->field => $value]) > 0) {
                 $this->context->buildViolation($constraint->message)
-                    ->setParameter('{{ field }}', $constraint->field)
                     ->addViolation();
 
                 return;

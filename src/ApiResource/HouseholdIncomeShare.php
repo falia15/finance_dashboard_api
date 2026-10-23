@@ -18,7 +18,7 @@ final class HouseholdIncomeShare
         public readonly string $amount,
         public readonly int $appliedDivisor,
         /** HouseholdMember IRI receiving the whole amount, null = equal split */
-        public readonly ?string $member,
+        public readonly ?string $householdMember,
         public readonly string $share,
     ) {
     }

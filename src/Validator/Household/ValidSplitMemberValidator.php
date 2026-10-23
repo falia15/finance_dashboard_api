@@ -10,7 +10,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 /**
- * `member` (null = split equally) is only set on a household row, and
+ * `householdMember` (null = split equally) is only set on a household row, and
  * points to a member of that household. The member must be active when
  * it is picked — a row keeps its member after that member leaves.
  *
@@ -35,7 +35,7 @@ class ValidSplitMemberValidator extends ConstraintValidator
 
         $accessor = PropertyAccess::createPropertyAccessor();
         /** @var HouseholdMember|null $member */
-        $member = $accessor->getValue($value, 'member');
+        $member = $accessor->getValue($value, 'householdMember');
         if (null === $member) {
             return;
         }
@@ -54,13 +54,13 @@ class ValidSplitMemberValidator extends ConstraintValidator
         }
 
         $original = $this->entityManager->getUnitOfWork()->getOriginalEntityData($value);
-        if (($original['member'] ?? null) !== $member && null !== $member->getLeftAt()) {
+        if (($original['householdMember'] ?? null) !== $member && null !== $member->getLeftAt()) {
             $this->addViolation($constraint->inactiveMemberMessage);
         }
     }
 
     private function addViolation(string $message): void
     {
-        $this->context->buildViolation($message)->atPath('member')->addViolation();
+        $this->context->buildViolation($message)->atPath('householdMember')->addViolation();
     }
 }

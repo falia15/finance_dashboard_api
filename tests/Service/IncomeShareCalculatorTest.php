@@ -67,7 +67,7 @@ final class IncomeShareCalculatorTest extends TestCase
     public function testShareForMemberGetsTheWholeAmount(): void
     {
         $viewer = new HouseholdMember();
-        $income = (new Income())->setAmount('150.00')->setAppliedDivisor(2)->setMember($viewer);
+        $income = (new Income())->setAmount('150.00')->setAppliedDivisor(2)->setHouseholdMember($viewer);
 
         self::assertSame('150.00', $this->calculator->shareFor($income, $viewer));
     }
@@ -75,7 +75,7 @@ final class IncomeShareCalculatorTest extends TestCase
     public function testShareForAnotherMemberIsZero(): void
     {
         $viewer = (new HouseholdMember())->setIsOwner(true);
-        $income = (new Income())->setAmount('150.00')->setAppliedDivisor(2)->setMember(new HouseholdMember());
+        $income = (new Income())->setAmount('150.00')->setAppliedDivisor(2)->setHouseholdMember(new HouseholdMember());
 
         self::assertSame('0.00', $this->calculator->shareFor($income, $viewer));
     }

@@ -55,7 +55,7 @@ final class ProfileIncomeYearBuilder
                 $this->iriConverter->getIriFromResource($income->getType()),
                 $income->getAmount(),
                 $income->getAppliedDivisor(),
-                null === $income->getMember() ? null : $this->iriConverter->getIriFromResource($income->getMember()),
+                null === $income->getHouseholdMember() ? null : $this->iriConverter->getIriFromResource($income->getHouseholdMember()),
                 $this->calculator->shareFor($income, $memberships[$household->getId()]),
             );
         }

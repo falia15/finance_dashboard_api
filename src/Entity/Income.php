@@ -15,7 +15,7 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\IncomeRepository;
 use App\Validator\Common\ExactlyOneOf;
-use App\Validator\Household\ValidSplitMember;
+use App\Validator\Household\ValidRowOwnerMember;
 use App\Validator\Profile\InActiveProfileScope;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
-#[ValidSplitMember]
+#[ValidRowOwnerMember]
 // One row per period and type for an owner; each check is skipped when its owner is null
 #[UniqueEntity(fields: ['profile', 'year', 'month', 'type'], message: 'This profile already has an income of this type for this month.', errorPath: 'type')]
 #[UniqueEntity(fields: ['household', 'year', 'month', 'type'], message: 'This household already has an income of this type for this month.', errorPath: 'type')]
@@ -51,7 +51,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     'month' => 'exact',
     'type' => 'exact',
 ])]
-class Income
+class Income implements HouseholdRowInterface
 {
     use TimestampableTrait;
 

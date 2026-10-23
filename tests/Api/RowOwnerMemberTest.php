@@ -8,10 +8,10 @@ use App\Entity\Income;
 use App\Entity\Profile;
 
 /**
- * Covers App\Validator\Household\ValidSplitMember through `Income` (shared by
+ * Covers App\Validator\Household\ValidRowOwnerMember through `Income` (shared by
  * `Expense` and `FixedExpense`), and App\Validator\Household\HasNoEntries.
  */
-final class SplitMemberTest extends ApiTestCase
+final class RowOwnerMemberTest extends ApiTestCase
 {
     use HouseholdFixtures;
     use IncomeFixtures;

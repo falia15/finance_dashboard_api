@@ -15,7 +15,7 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\ExpenseRepository;
 use App\Validator\Common\ExactlyOneOf;
-use App\Validator\Household\ValidSplitMember;
+use App\Validator\Household\ValidRowOwnerMember;
 use App\Validator\Profile\InActiveProfileScope;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,7 +25,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
-#[ValidSplitMember]
+#[ValidRowOwnerMember]
 #[ORM\Table(name: 'expense')]
 #[ORM\Index(name: 'idx_expense_date_category', columns: ['date', 'category_id'])]
 #[ApiResource(operations: [
@@ -41,7 +41,7 @@ use Doctrine\ORM\Mapping as ORM;
     'category' => 'exact',
 ])]
 #[ApiFilter(DateFilter::class, properties: ['date'])]
-class Expense
+class Expense implements HouseholdRowInterface
 {
     use TimestampableTrait;
 

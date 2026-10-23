@@ -13,7 +13,7 @@ use ApiPlatform\Metadata\Post;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\FixedExpenseRepository;
 use App\Validator\Common\ExactlyOneOf;
-use App\Validator\Household\ValidSplitMember;
+use App\Validator\Household\ValidRowOwnerMember;
 use App\Validator\Profile\InActiveProfileScope;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -26,7 +26,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 #[InActiveProfileScope]
 #[ExactlyOneOf(first: 'profile', second: 'household')]
-#[ValidSplitMember]
+#[ValidRowOwnerMember]
 #[ApiResource(operations: [
     new GetCollection(),
     new Get(),
@@ -38,7 +38,7 @@ use Doctrine\ORM\Mapping as ORM;
     'profile' => 'exact',
     'household' => 'exact',
 ])]
-class FixedExpense
+class FixedExpense implements HouseholdRowInterface
 {
     use TimestampableTrait;
 

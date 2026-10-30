@@ -18,9 +18,7 @@ use Doctrine\ORM\QueryBuilder;
 
 /**
  * Restricts reads (collections and items, hence PATCH/DELETE too) to the
- * active profile (`X-Profile-Id` header): its own rows, plus the rows of
- * the households it is an active real member of — and those households
- * and their members themselves.
+ * active profile (see`X-Profile-Id` header)
  *
  * Writes are checked by App\Validator\Profile\InActiveProfileScope.
  */
@@ -47,12 +45,18 @@ final class ActiveProfileExtension implements QueryCollectionExtensionInterface,
         // Expression holding the household id to check the membership of,
         // and alias of the entity carrying `profile` when there is one.
         [$householdExpression, $ownerAlias] = match ($resourceClass) {
-            Household::class => [sprintf('%s.id', $rootAlias), null],
-            HouseholdMember::class => [sprintf('IDENTITY(%s.household)', $rootAlias), null],
-            Income::class, Expense::class, FixedExpense::class => [sprintf('IDENTITY(%s.household)', $rootAlias), $rootAlias],
-            Note::class => [null, $rootAlias],
-            FixedExpenseAmount::class => [null, $queryNameGenerator->generateJoinAlias('fixedExpense')],
-            default => [null, null],
+            Household::class => 
+                [sprintf('%s.id', $rootAlias), null],
+            HouseholdMember::class => 
+                [sprintf('IDENTITY(%s.household)', $rootAlias), null],
+            Income::class, Expense::class, FixedExpense::class => 
+                [sprintf('IDENTITY(%s.household)', $rootAlias), $rootAlias],
+            Note::class => 
+                [null, $rootAlias],
+            FixedExpenseAmount::class => 
+                [null, $queryNameGenerator->generateJoinAlias('fixedExpense')],
+            default => 
+                [null, null],
         };
 
         if (null === $householdExpression && null === $ownerAlias) {

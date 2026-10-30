@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Validator\IncomeType;
+
+use App\Entity\IncomeType;
+use App\Repository\IncomeRepository;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
+
+/**
+ * Prevents removing an income type while an income still uses it.
+ * The user must first change the type of those incomes.
+ */
+class IncomeTypeNotInUseValidator extends ConstraintValidator
+{
+    public function __construct(private readonly IncomeRepository $incomeRepository)
+    {
+    }
+
+    public function validate(mixed $value, Constraint $constraint): void
+    {
+        if (!$constraint instanceof IncomeTypeNotInUse) {
+            throw new UnexpectedTypeException($constraint, IncomeTypeNotInUse::class);
+        }
+
+        if (!$value instanceof IncomeType) {
+            throw new UnexpectedValueException($value, IncomeType::class);
+        }
+
+        $count = $this->countIncomesUsing($value);
+        if ($this->isInUse($count)) {
+            $this->context->buildViolation($constraint->message)
+                ->setParameter('{{ count }}', (string) $count)
+                ->addViolation();
+        }
+    }
+
+    private function countIncomesUsing(IncomeType $type): int
+    {
+        return $this->incomeRepository->count(['type' => $type]);
+    }
+
+    private function isInUse(int $incomeCount): bool
+    {
+        return $incomeCount > 0;
+    }
+}

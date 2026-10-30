@@ -3,18 +3,17 @@
 namespace App\Tests\Service;
 
 use App\Entity\HouseholdMember;
-use App\Entity\Income;
-use App\Service\IncomeShareCalculator;
+use App\Service\HouseholdShareCalculator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-final class IncomeShareCalculatorTest extends TestCase
+final class HouseholdShareCalculatorTest extends TestCase
 {
-    private IncomeShareCalculator $calculator;
+    private HouseholdShareCalculator $calculator;
 
     protected function setUp(): void
     {
-        $this->calculator = new IncomeShareCalculator();
+        $this->calculator = new HouseholdShareCalculator();
     }
 
     /**
@@ -67,25 +66,21 @@ final class IncomeShareCalculatorTest extends TestCase
     public function testShareForMemberGetsTheWholeAmount(): void
     {
         $viewer = new HouseholdMember();
-        $income = (new Income())->setAmount('150.00')->setAppliedDivisor(2)->setHouseholdMember($viewer);
 
-        self::assertSame('150.00', $this->calculator->shareFor($income, $viewer));
+        self::assertSame('150.00', $this->calculator->shareFor('150.00', 2, $viewer, $viewer));
     }
 
     public function testShareForAnotherMemberIsZero(): void
     {
         $viewer = (new HouseholdMember())->setIsOwner(true);
-        $income = (new Income())->setAmount('150.00')->setAppliedDivisor(2)->setHouseholdMember(new HouseholdMember());
 
-        self::assertSame('0.00', $this->calculator->shareFor($income, $viewer));
+        self::assertSame('0.00', $this->calculator->shareFor('150.00', 2, new HouseholdMember(), $viewer));
     }
 
     public function testShareForEqualSplitUsesTheFrozenDivisor(): void
     {
-        $income = (new Income())->setAmount('45.01')->setAppliedDivisor(2);
-
-        self::assertSame('22.51', $this->calculator->shareFor($income, (new HouseholdMember())->setIsOwner(true)));
-        self::assertSame('22.50', $this->calculator->shareFor($income, new HouseholdMember()));
+        self::assertSame('22.51', $this->calculator->shareFor('45.01', 2, null, (new HouseholdMember())->setIsOwner(true)));
+        self::assertSame('22.50', $this->calculator->shareFor('45.01', 2, null, new HouseholdMember()));
     }
 
     /**

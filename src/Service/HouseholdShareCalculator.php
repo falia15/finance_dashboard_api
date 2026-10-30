@@ -3,16 +3,15 @@
 namespace App\Service;
 
 use App\Entity\HouseholdMember;
-use App\Entity\Income;
 
 /**
- * A member's share of a household income row, see "Household split" in
- * backend/v1/03-business-rules.md.
+ * A member's share of a household row (income, fixed expense amount...),
+ * see "Household split" in backend/v1/03-business-rules.md.
  *
  * Amounts are DECIMAL(10,2) strings, computed as integer cents (no float,
  * bcmath isn't installed): the shares of a row always add up to its amount.
  */
-final class IncomeShareCalculator
+final class HouseholdShareCalculator
 {
     /**
      * Share of one member when `$amount` is split equally between
@@ -37,18 +36,20 @@ final class IncomeShareCalculator
     /**
      * Share of `$viewer` (the viewing profile's membership) of a household
      * row: the whole amount if the row is assigned to them, nothing if it
-     * is assigned to another member, an equal share otherwise.
+     * is assigned to another member (`$assignedMember`), an equal share
+     * otherwise.
+     *
+     * Takes the row's values rather than the row itself: they don't live on
+     * the same entity for every row (a fixed expense amount gets its member
+     * from its line).
      */
-    public function shareFor(Income $income, HouseholdMember $viewer): string
+    public function shareFor(string $amount, int $appliedDivisor, ?HouseholdMember $assignedMember, HouseholdMember $viewer): string
     {
-        $amount = $income->getAmount() ?? '0.00';
-        $member = $income->getHouseholdMember();
-
-        if (null !== $member) {
-            return $member === $viewer ? self::fromCents(self::toCents($amount)) : '0.00';
+        if (null !== $assignedMember) {
+            return $assignedMember === $viewer ? self::fromCents(self::toCents($amount)) : '0.00';
         }
 
-        return $this->share($amount, $income->getAppliedDivisor(), $viewer->isOwner());
+        return $this->share($amount, $appliedDivisor, $viewer->isOwner());
     }
 
     /** Sum of decimal amounts, e.g. sum('0.10', '0.20') → '0.30'. */

@@ -11,9 +11,12 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Dto\FixedExpenseApplyToYearInput;
+use App\Dto\FixedExpenseApplyToYearOutput;
 use App\Dto\FixedExpenseInitialAmount;
 use App\Entity\Trait\TimestampableTrait;
 use App\Repository\FixedExpenseRepository;
+use App\State\FixedExpenseApplyToYearProcessor;
 use App\State\FixedExpenseCreateProcessor;
 use App\State\FixedExpenseUpdateProcessor;
 use App\Validator\Common\ExactlyOneOf;
@@ -34,6 +37,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * - PATCH can't move `startYear`; setting the end deletes the amounts
  *   after it, clearing it reactivates the line.
  * - DELETE removes every amount of the line (ON DELETE CASCADE).
+ * - POST /fixed_expenses/{id}/apply_to_year copies one month's amount to
+ *   the whole year (FixedExpenseApplyToYearProcessor).
  */
 #[ORM\Entity(repositoryClass: FixedExpenseRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -53,6 +58,16 @@ use Symfony\Component\Validator\Constraints as Assert;
         denormalizationContext: [AbstractNormalizer::IGNORED_ATTRIBUTES => ['startYear', 'initialAmount']],
     ),
     new Delete(),
+    new Post(
+        uriTemplate: '/fixed_expenses/{id}/apply_to_year',
+        status: 200,
+        input: FixedExpenseApplyToYearInput::class,
+        output: FixedExpenseApplyToYearOutput::class,
+        // Loads the line (scoped to the active profile) despite the POST, 404 if not found
+        read: true,
+        throwOnNotFound: true,
+        processor: FixedExpenseApplyToYearProcessor::class,
+    ),
 ])]
 #[ApiFilter(SearchFilter::class, properties: [
     'profile' => 'exact',

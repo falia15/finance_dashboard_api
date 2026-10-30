@@ -22,7 +22,7 @@ final class ProfileIncomeYearBuilder
     public function __construct(
         private readonly IncomeRepository $incomeRepository,
         private readonly HouseholdMemberRepository $householdMemberRepository,
-        private readonly IncomeShareCalculator $calculator,
+        private readonly HouseholdShareCalculator $calculator,
         private readonly IriConverterInterface $iriConverter,
     ) {
     }
@@ -56,7 +56,7 @@ final class ProfileIncomeYearBuilder
                 $income->getAmount(),
                 $income->getAppliedDivisor(),
                 null === $income->getHouseholdMember() ? null : $this->iriConverter->getIriFromResource($income->getHouseholdMember()),
-                $this->calculator->shareFor($income, $memberships[$household->getId()]),
+                $this->calculator->shareFor($income->getAmount(), $income->getAppliedDivisor(), $income->getHouseholdMember(), $memberships[$household->getId()]),
             );
         }
 
